@@ -11,7 +11,7 @@ router.post('/chat', async (req, res) => {
 			return res.status(400).json({ error: 'messages are required...' });
 		}
 		const completion = await runChat(messages);
-		res.json(completion);
+		res.json({reply: completion});
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ error: 'Chat failed' });
