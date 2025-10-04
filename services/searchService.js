@@ -106,7 +106,7 @@ Return a 1-2 sentence explanation for why it was chosen, and how it is relevant.
 			})
 		);
 
-		return enriched.map(a => a.title);
+		return {data: enriched};
 	} catch (err) {
 		console.error('Error generating article:', err);
 		return { error: 'LLM generation failed' };
