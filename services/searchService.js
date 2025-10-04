@@ -81,7 +81,7 @@ async function searchArticles(context) {
 			},
 		]);
 
-		return {...results[0]};
+		return {results};
 	} catch (err) {
 		console.error('Error generating article:', err);
 		return { error: 'LLM generation failed' };
