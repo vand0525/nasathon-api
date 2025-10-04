@@ -44,8 +44,8 @@ async function searchArticles(context) {
 			},
 		});
 
-		const article = JSON.parse(completion.choices[0].message.content);
-		const basis = `${article.title}\n\n${article.abstract}\n\n${article.tl_dr}`;
+		const imaginedArticle = JSON.parse(completion.choices[0].message.content);
+		const basis = `${imaginedArticle.title}\n\n${imaginedArticle.abstract}\n\n${imaginedArticle.tl_dr}`;
 		const embeddingResp = await client.embeddings.create({
 			model: process.env.EMBEDDER || 'text-embedding-3-small',
 			input: basis,
@@ -81,7 +81,32 @@ async function searchArticles(context) {
 			},
 		]);
 
-		return {results};
+		const getRerankPrompt = (rank, article) => `
+This article was ranked ${rank} of 5 in a vector similarity search:
+
+${JSON.stringify(article)}
+
+The basis for the search was generated from this:
+${JSON.stringify(imaginedArticle)}
+
+Return a 1-2 sentence explanation for why it was chosen, and how it is relevant.
+`;
+
+		const enriched = await Promise.all(
+			results.map(async (doc, i) => {
+				const prompt = getRerankPrompt(i + 1, doc, imaginedArticle);
+				const completion = await client.chat.completions.create({
+					model: process.env.MODEL || 'gpt-4o-mini',
+					messages: [{ role: 'user', content: prompt }],
+					temperature: 0.3,
+				});
+
+				const reason = completion.choices[0].message.content.trim();
+				return { ...doc, rank: i + 1, reason };
+			})
+		);
+
+		return enriched.map(a => a.title);
 	} catch (err) {
 		console.error('Error generating article:', err);
 		return { error: 'LLM generation failed' };
@@ -89,3 +114,4 @@ async function searchArticles(context) {
 }
 
 export { searchArticles };
+
