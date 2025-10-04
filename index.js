@@ -1,9 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
 import connect from './config/db.js';
 import articlesRoutes from './routes/articles.js';
 
-dotenv.config();
 connect();
 
 const app = express();
