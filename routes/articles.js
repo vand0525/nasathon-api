@@ -1,9 +1,11 @@
 import express from 'express';
-import {searchArticles} from '../services/searchService';
+import {searchArticles} from '../services/searchService.js';
+
+const router = express.Router()
 
 router.post("/", async (req, res) => {
   try {
-    const context = req.body; // whatever chat context you send up
+    const context = req.body; 
     const results = await searchArticles(context);
     res.json(results);
   } catch (err) {
